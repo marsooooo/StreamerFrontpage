@@ -1,5 +1,6 @@
 export default function TwitchStream() {
   const twitchChannel = import.meta.env.VITE_TWITCH_USER || 'peaxy'
+  const twitchParent = import.meta.env.VITE_TWITCH_PARENT
 
   return (
     <section className="w-full bg-gradient-to-b from-purple-950 to-gray-900 py-12">
@@ -10,7 +11,7 @@ export default function TwitchStream() {
           </h1>
           <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
             <iframe
-              src={`https://player.twitch.tv/?channel=${twitchChannel}&parent=localhost`}
+              src={`https://player.twitch.tv/?channel=${twitchChannel}&parent=${twitchParent}`}
               className="absolute top-0 left-0 w-full h-full rounded-lg shadow-2xl"
               allowFullScreen
             />
