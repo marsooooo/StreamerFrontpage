@@ -1,11 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
-import { fetchYouTubeVideos } from '../api/client'
-
-type YouTubeVideo = {
-  id: string
-  title: string
-  thumbnail: string
-}
+import { useEffect, useRef } from "react"
 
 interface TwitchEmbedOptions {
   width?: string | number
@@ -26,122 +19,36 @@ declare global {
   }
 }
 
-export default function LatestContent() {
-  const twitchUser = import.meta.env.VITE_TWITCH_USER || 'peaxy'
-  const youtubeUser = import.meta.env.VITE_YOUTUBE_USER || 'peaxy'
-  const twitterUser = import.meta.env.VITE_XTWITTER_USER || 'peaxy'
-  const instagramUser = import.meta.env.VITE_INSTAGRAM_USER || 'peaxy'
+export default function TwitchStream() {
+  const twitchChannel = import.meta.env.VITE_TWITCH_USER || "peaxy"
   const twitchParent = import.meta.env.VITE_TWITCH_PARENT || window.location.hostname
-
   const twitchRef = useRef<HTMLDivElement>(null)
-  const [youtubeVideos, setYoutubeVideos] = useState<YouTubeVideo[]>([])
-  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     if (twitchRef.current && window.Twitch) {
       new window.Twitch.Embed(twitchRef.current, {
-        width: '100%',
-        height: '100%',
-        channel: twitchUser,
+        width: "100%",
+        height: "100%",
+        channel: twitchChannel,
         autoplay: true,
         muted: true,
         parent: [twitchParent],
       })
     }
-  }, [twitchUser, twitchParent])
-
-  useEffect(() => {
-    const fetchVideos = async () => {
-      try {
-        const videos = await fetchYouTubeVideos(youtubeUser)
-        setYoutubeVideos(videos)
-      } catch (error) {
-        console.error('Error fetching YouTube videos:', error)
-      } finally {
-        setLoading(false)
-      }
-    }
-    fetchVideos()
-  }, [youtubeUser])
-
-  const socialLinks = [
-    { name: 'Twitch', url: `https://twitch.tv/${twitchUser}`, icon: '📺', color: 'bg-purple-600 hover:bg-purple-700' },
-    { name: 'YouTube', url: `https://youtube.com/@${youtubeUser}`, icon: '🎥', color: 'bg-red-600 hover:bg-red-700' },
-    { name: 'X', url: `https://x.com/${twitterUser}`, icon: '𝕏', color: 'bg-black hover:bg-gray-900 border border-white' },
-    { name: 'Instagram', url: `https://instagram.com/${instagramUser}`, icon: '📸', color: 'bg-pink-600 hover:bg-pink-700' },
-  ]
+  }, [twitchChannel, twitchParent])
 
   return (
-    <section className="w-full bg-gray-900 py-16">
+    <section className="w-full bg-gradient-to-b from-purple-950 to-gray-900 py-12">
       <div className="container mx-auto px-4">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-4xl font-bold text-white mb-12 text-center">
-            Derniers <span className="text-purple-400">Contenus</span>
-          </h2>
-
-          {/* Twitch Embed */}
-          <div className="mb-12">
-            <h3 className="text-2xl font-semibold text-white mb-6 text-center">Peaxy Live</h3>
-            <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
-              <div ref={twitchRef} className="absolute top-0 left-0 w-full h-full rounded-lg shadow-2xl" />
-            </div>
-          </div>
-
-          {/* YouTube Videos */}
-          <div className="mb-12">
-            <h3 className="text-2xl font-semibold text-white mb-6">Dernières vidéos YouTube</h3>
-            {loading ? (
-              <div className="text-center text-white py-12">
-                <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-purple-500 border-t-transparent"></div>
-                <p className="mt-4">Chargement des vidéos...</p>
-              </div>
-            ) : youtubeVideos.length === 0 ? (
-              <div className="text-center text-gray-400 py-12">
-                <p>Pas de vidéos trouvées.</p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {youtubeVideos.map(video => (
-                  <a
-                    key={video.id}
-                    href={`https://www.youtube.com/watch?v=${video.id}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="bg-gray-800 rounded-lg overflow-hidden shadow-lg hover:shadow-purple-500/50 transition-shadow"
-                  >
-                    <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
-                      <img
-                        src={video.thumbnail}
-                        alt={video.title}
-                        className="absolute top-0 left-0 w-full h-full object-cover"
-                      />
-                    </div>
-                    <div className="p-4">
-                      <p className="text-white font-medium line-clamp-2">{video.title}</p>
-                    </div>
-                  </a>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Social Media Links */}
-          <div>
-            <h3 className="text-2xl font-semibold text-white mb-6 text-center">Retrouve Peaxy sur</h3>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {socialLinks.map(link => (
-                <a
-                  key={link.name}
-                  href={link.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={`${link.color} text-white font-semibold py-4 px-6 rounded-lg transition-all transform hover:scale-105 flex items-center justify-center gap-2 shadow-lg`}
-                >
-                  <span className="text-2xl">{link.icon}</span>
-                  <span>{link.name}</span>
-                </a>
-              ))}
-            </div>
+          <h1 className="text-5xl font-bold text-white text-center mb-8">
+            Peaxy <span className="text-purple-400">Live</span>
+          </h1>
+          <div className="relative w-full" style={{ paddingBottom: "56.25%" }}>
+            <div
+              ref={twitchRef}
+              className="absolute top-0 left-0 w-full h-full rounded-lg shadow-2xl"
+            />
           </div>
         </div>
       </div>
