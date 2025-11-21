@@ -28,9 +28,6 @@ export default function EmotesSection() {
 
           {/* Latest 5 Emotes - Large Display */}
           <div className="mb-12">
-            <h3 className="text-2xl font-semibold text-white mb-6 text-center">
-              Nouveautés
-            </h3>
             <div className="grid grid-cols-2 md:grid-cols-5 gap-6">
               {latestEmotes.map((emote) => (
                 <div
@@ -50,7 +47,7 @@ export default function EmotesSection() {
           {/* Older Emotes - Grid Display */}
           <div>
             <h3 className="text-xl font-semibold text-white mb-4 text-center">
-              Collection
+              Archives
             </h3>
             <div className="grid grid-cols-4 md:grid-cols-7 gap-3">
               {olderEmotes.map((emote) => (
@@ -68,7 +65,7 @@ export default function EmotesSection() {
           </div>
 
           <p className="text-gray-500 text-sm text-center mt-6">
-            Ajout dans /public/emotes/
+            ⚠️😡 Spammez Peaxy pour qu'elle me laisse mettre les emotes en place !!
           </p>
         </div>
       </div>

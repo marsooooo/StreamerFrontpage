@@ -77,7 +77,7 @@ export default function MarbleLeaderboard({ onPlayerCountChange }: MarbleLeaderb
               disabled={availableSheets.length === 0}
             >
               {availableSheets.length === 0 ? (
-                <option>Loading...</option>
+                <option>Chargement...</option>
               ) : (
                 availableSheets.map((sheetName) => (
                   <option key={sheetName} value={sheetName}>
@@ -89,7 +89,7 @@ export default function MarbleLeaderboard({ onPlayerCountChange }: MarbleLeaderb
             
             <input
               type="text"
-              placeholder="Search player..."
+              placeholder="Rechercher un joueur..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="bg-gray-800 text-white px-6 py-3 rounded-lg border border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-400 w-full sm:w-64"
@@ -99,7 +99,7 @@ export default function MarbleLeaderboard({ onPlayerCountChange }: MarbleLeaderb
           {loading && (
             <div className="text-center text-white py-12">
               <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-purple-500 border-t-transparent"></div>
-              <p className="mt-4">Loading data...</p>
+              <p className="mt-4">Chargement des données...</p>
             </div>
           )}
           
@@ -117,11 +117,11 @@ export default function MarbleLeaderboard({ onPlayerCountChange }: MarbleLeaderb
                   <table className="w-full">
                     <thead className="bg-purple-900 sticky top-0">
                       <tr>
-                        <th className="px-6 py-4 text-left text-sm font-semibold text-white">Rank</th>
-                        <th className="px-6 py-4 text-left text-sm font-semibold text-white">Player</th>
-                        <th className="px-6 py-4 text-center text-sm font-semibold text-white">Wins</th>
+                        <th className="px-6 py-4 text-left text-sm font-semibold text-white">Rang</th>
+                        <th className="px-6 py-4 text-left text-sm font-semibold text-white">Joueur</th>
+                        <th className="px-6 py-4 text-center text-sm font-semibold text-white">Victoires</th>
                         <th className="px-6 py-4 text-center text-sm font-semibold text-white">Points</th>
-                        <th className="px-6 py-4 text-center text-sm font-semibold text-white">Races</th>
+                        <th className="px-6 py-4 text-center text-sm font-semibold text-white">Courses</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-700">

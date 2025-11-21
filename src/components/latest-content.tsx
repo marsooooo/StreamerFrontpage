@@ -43,44 +43,45 @@ export default function LatestContent() {
       <div className="container mx-auto px-4">
         <div className="max-w-6xl mx-auto">
           <h2 className="text-4xl font-bold text-white mb-12 text-center">
-            Latest <span className="text-purple-400">Content</span>
+            Derniers <span className="text-purple-400">Contenus</span>
           </h2>
 
           {/* YouTube Videos */}
           <div className="mb-12">
             <h3 className="text-2xl font-semibold text-white mb-6">
-              Latest YouTube Videos
+              Dernières vidéos YouTube
             </h3>
             
             {loading ? (
               <div className="text-center text-white py-12">
                 <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-purple-500 border-t-transparent"></div>
-                <p className="mt-4">Loading videos...</p>
+                <p className="mt-4">Chargement des vidéos...</p>
               </div>
             ) : youtubeVideos.length === 0 ? (
               <div className="text-center text-gray-400 py-12">
-                <p>No videos found. Check VITE_YOUTUBE_USER and VITE_GOOGLE_API_KEY</p>
+                <p>Pas de vidéos trouvées.</p>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {youtubeVideos.map((video) => (
-                  <div
+                  <a
                     key={video.id}
+                    href={`https://www.youtube.com/watch?v=${video.id}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className="bg-gray-800 rounded-lg overflow-hidden shadow-lg hover:shadow-purple-500/50 transition-shadow"
                   >
                     <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
-                      <iframe
-                        src={`https://www.youtube.com/embed/${video.id}`}
-                        className="absolute top-0 left-0 w-full h-full"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                        referrerPolicy="strict-origin-when-cross-origin"
-                        allowFullScreen
+                      <img
+                        src={video.thumbnail}
+                        alt={video.title}
+                        className="absolute top-0 left-0 w-full h-full object-cover"
                       />
                     </div>
                     <div className="p-4">
                       <p className="text-white font-medium line-clamp-2">{video.title}</p>
                     </div>
-                  </div>
+                  </a>
                 ))}
               </div>
             )}
@@ -89,7 +90,7 @@ export default function LatestContent() {
           {/* Social Media Links */}
           <div>
             <h3 className="text-2xl font-semibold text-white mb-6 text-center">
-              Find Peaxy on
+              Retrouve Peaxy sur
             </h3>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {socialLinks.map((link) => (

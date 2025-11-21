@@ -11,7 +11,7 @@ export default function TwitchStream() {
           </h1>
           <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
             <iframe
-              src={`https://player.twitch.tv/?channel=${twitchChannel}&parent=${twitchParent}`}
+              src={`https://player.twitch.tv/?channel=${twitchChannel}&parent=${twitchParent}&autoplay=true&muted=true`}
               className="absolute top-0 left-0 w-full h-full rounded-lg shadow-2xl"
               allowFullScreen
             />
