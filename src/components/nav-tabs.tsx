@@ -47,7 +47,7 @@ export default function NavTabs({ activeTab, onTabChange, showTabs }: NavTabsPro
       {/* Mobile Navigation (Custom Overlay) */}
       <div className="md:hidden">
         <div className="fixed top-4 right-4 z-50">
-          <div className="bg-black/60 backdrop-blur-xl rounded-full border border-white/10 p-1">
+          <div className="bg-black/30 backdrop-blur-md rounded-full border border-white/10 p-1">
             <Button
               variant="ghost"
               size="icon"
@@ -63,7 +63,7 @@ export default function NavTabs({ activeTab, onTabChange, showTabs }: NavTabsPro
         {/* Mobile Menu Overlay */}
         {isOpen && (
           <div className="fixed top-20 right-4 w-64 z-40 animate-in slide-in-from-top-5 fade-in duration-200">
-            <div className="bg-black/90 backdrop-blur-xl border border-white/10 rounded-2xl p-4 shadow-2xl flex flex-col gap-2">
+            <div className="bg-black/60 backdrop-blur-md border border-white/10 rounded-2xl p-4 shadow-2xl flex flex-col gap-2">
               {tabs.map((tab) => (
                 <button
                   key={tab.id}
