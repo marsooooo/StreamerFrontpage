@@ -1,54 +1,60 @@
-import { useEffect, useRef } from "react"
+"use client"
 
-interface TwitchEmbedOptions {
-  width?: string | number
-  height?: string | number
-  channel?: string
-  autoplay?: boolean
-  muted?: boolean
-  parent?: string[]
-}
-
-interface Twitch {
-  Embed: new (container: HTMLElement, options: TwitchEmbedOptions) => any
-}
-
-declare global {
-  interface Window {
-    Twitch?: Twitch
-  }
-}
+import { useEffect, useRef, useState } from "react"
 
 export default function TwitchStream() {
   const twitchChannel = import.meta.env.VITE_TWITCH_USER || "peaxy"
-  const twitchParent = import.meta.env.VITE_TWITCH_PARENT || window.location.hostname
   const twitchRef = useRef<HTMLDivElement>(null)
+  const embedRef = useRef<any>(null)
+  const [scriptLoaded, setScriptLoaded] = useState(false)
 
   useEffect(() => {
-    if (twitchRef.current && window.Twitch) {
-      new window.Twitch.Embed(twitchRef.current, {
-        width: "100%",
-        height: "100%",
-        channel: twitchChannel,
-        autoplay: true,
-        muted: true,
-        parent: [twitchParent],
-      })
+    if (!window.Twitch) {
+      const script = document.createElement("script")
+      script.setAttribute("src", "https://embed.twitch.tv/embed/v1.js")
+      script.addEventListener("load", () => setScriptLoaded(true))
+      document.body.appendChild(script)
+    } else {
+      setScriptLoaded(true)
     }
-  }, [twitchChannel, twitchParent])
+  }, [])
+
+  useEffect(() => {
+    if (scriptLoaded && twitchRef.current && !embedRef.current) {
+      twitchRef.current.innerHTML = ""
+      
+      const parents = [window.location.hostname]
+
+      try {
+        if (window.Twitch) {
+          embedRef.current = new window.Twitch.Embed(twitchRef.current, {
+            width: "100%",
+            height: "100%",
+            channel: twitchChannel,
+            layout: "video",
+            autoplay: true,
+            muted: true,
+            parent: parents,
+          })
+        }
+      } catch (e) {
+        console.error("Twitch embed error:", e)
+      }
+    }
+  }, [scriptLoaded, twitchChannel])
 
   return (
-    <section className="w-full bg-gradient-to-b from-purple-950 to-gray-900 py-12">
+    <section className="w-full py-8 animate-in fade-in duration-700">
       <div className="container mx-auto px-4">
         <div className="max-w-6xl mx-auto">
-          <h1 className="text-5xl font-bold text-white text-center mb-8">
+          <h1 className="text-4xl md:text-5xl font-bold text-white text-center mb-8 drop-shadow-lg">
             Peaxy <span className="text-purple-400">Live</span>
           </h1>
-          <div className="relative w-full" style={{ paddingBottom: "56.25%" }}>
-            <div
-              ref={twitchRef}
-              className="absolute top-0 left-0 w-full h-full rounded-lg shadow-2xl"
-            />
+          <div
+            className="relative w-full bg-black/40 rounded-xl overflow-hidden border border-white/10 shadow-2xl"
+            style={{ paddingBottom: "56.25%" }}
+          >
+            <div id="twitch-embed" ref={twitchRef} className="absolute top-0 left-0 w-full h-full" />
           </div>
         </div>
       </div>
