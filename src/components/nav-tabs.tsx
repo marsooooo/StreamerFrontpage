@@ -23,9 +23,9 @@ export default function NavTabs({ activeTab, onTabChange, showTabs }: NavTabsPro
   ] as const
 
   return (
-    <nav className="sticky top-4 z-50 px-4 mb-8">
+    <nav className="px-4 mb-8">
       {/* Desktop Navigation */}
-      <div className="hidden md:flex justify-center">
+      <div className="hidden md:flex justify-center mt-8">
         <div className="flex items-center p-1 space-x-1 bg-black/60 backdrop-blur-xl rounded-full border border-white/10 shadow-2xl">
           {tabs.map((tab) => (
             <button
@@ -45,22 +45,24 @@ export default function NavTabs({ activeTab, onTabChange, showTabs }: NavTabsPro
       </div>
 
       {/* Mobile Navigation (Custom Overlay) */}
-      <div className="md:hidden flex justify-end">
-        <div className="bg-black/60 backdrop-blur-xl rounded-full border border-white/10 p-1 relative z-50">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setIsOpen(!isOpen)}
-            className="rounded-full text-white hover:bg-white/10"
-          >
-            {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-            <span className="sr-only">Menu</span>
-          </Button>
+      <div className="md:hidden">
+        <div className="fixed top-4 right-4 z-50">
+          <div className="bg-black/60 backdrop-blur-xl rounded-full border border-white/10 p-1">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setIsOpen(!isOpen)}
+              className="rounded-full text-white hover:bg-white/10"
+            >
+              {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+              <span className="sr-only">Menu</span>
+            </Button>
+          </div>
         </div>
 
         {/* Mobile Menu Overlay */}
         {isOpen && (
-          <div className="absolute top-16 right-0 w-full px-4 z-40 animate-in slide-in-from-top-5 fade-in duration-200">
+          <div className="fixed top-20 right-4 w-64 z-40 animate-in slide-in-from-top-5 fade-in duration-200">
             <div className="bg-black/90 backdrop-blur-xl border border-white/10 rounded-2xl p-4 shadow-2xl flex flex-col gap-2">
               {tabs.map((tab) => (
                 <button

@@ -40,15 +40,15 @@ export default function App() {
     <div className="min-h-screen relative overflow-x-hidden text-white">
       <AnimatedBackground />
 
-      <div className="relative z-10 pb-20">
+      <div className="relative z-10">
+        <div className={`transition-opacity duration-1000 delay-300 ${navReady ? "opacity-100" : "opacity-0"}`}>
+          <TwitchStream />
+        </div>
+
         <div
           className={`transition-all duration-700 z-50 relative ${navReady ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-4"}`}
         >
           {showTabs && <NavTabs activeTab={activeTab} onTabChange={setActiveTab} showTabs={showTabs} />}
-        </div>
-
-        <div className={`transition-opacity duration-1000 delay-300 ${navReady ? "opacity-100" : "opacity-0"}`}>
-          <TwitchStream />
         </div>
 
         {/* Main content loads last to prevent pop-in/jank */}
