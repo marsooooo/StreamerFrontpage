@@ -117,6 +117,116 @@ app.get("/api/youtube/videos", async (req, res) => {
   }
 })
 
+app.get("/api/wizebot/level", async (req, res) => {
+  try {
+    const apiKey = process.env.WIZEBOT_API_KEY
+
+    if (!apiKey) {
+      return res.status(500).json({ error: "Missing WIZEBOT_API_KEY" })
+    }
+
+    const TOP_TYPE = "level"
+    const TOP_SUB_TYPE = "month"
+    const LIMIT = 5
+
+    const url = `https://wapi.wizebot.tv/api/ranking/${apiKey}/top/${TOP_TYPE}/${TOP_SUB_TYPE}/${LIMIT}`
+
+    const response = await fetch(url, {
+      headers: { accept: "application/json" },
+    })
+
+    if (!response.ok) {
+      return res.status(response.status).json({
+        error: "WizeBot API error",
+        status: response.status,
+      })
+    }
+
+    const result = await response.json()
+    res.json(result)
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fetch WizeBot level ranking" })
+  }
+})
+
+app.get("/api/twitch/redemptions", async (req, res) => {
+  try {
+    const clientId = process.env.TWITCH_CLIENT_ID
+    const accessToken = process.env.TWITCH_ACCESS_TOKEN
+    const broadcasterId = process.env.TWITCH_BROADCASTER_ID
+    const rewardId = process.env.TWITCH_REWARD_ID
+
+    if (!clientId || !accessToken || !broadcasterId || !rewardId) {
+      return res.status(500).json({ error: "Missing Twitch API credentials" })
+    }
+
+    const status = "UNFULFILLED"
+    const url = `https://api.twitch.tv/helix/channel_points/custom_rewards/redemptions?broadcaster_id=${broadcasterId}&reward_id=${rewardId}&status=${status}`
+
+    const response = await fetch(url, {
+      headers: {
+        "Client-Id": clientId,
+        Authorization: `Bearer ${accessToken}`,
+      },
+    })
+
+    const data = await response.json()
+
+    if (!response.ok) {
+      return res.status(response.status).json({
+        error: data.error || "Twitch API error",
+        message: data.message,
+      })
+    }
+
+    res.json({ redemptions: data.data || [] })
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fetch Twitch redemptions" })
+  }
+})
+
+app.get("/api/twitch/callback", async (req, res) => {
+  try {
+    const code = req.query.code as string
+
+    if (!code) {
+      return res.status(400).json({ error: "Missing OAuth code" })
+    }
+
+    const clientId = process.env.TWITCH_CLIENT_ID
+    const clientSecret = process.env.TWITCH_CLIENT_SECRET
+    const redirectUri = "http://localhost:3001/api/twitch/callback"
+
+    const url = "https://id.twitch.tv/oauth2/token"
+
+    const body = new URLSearchParams({
+      client_id: clientId!,
+      client_secret: clientSecret!,
+      code,
+      grant_type: "authorization_code",
+      redirect_uri: redirectUri,
+    })
+
+    const response = await fetch(url, {
+      method: "POST",
+      body,
+    })
+
+    const data = await response.json()
+
+    if (!response.ok) {
+      return res.status(500).json({ error: data })
+    }
+
+    console.log("ACCESS TOKEN:", data.access_token)
+    console.log("REFRESH TOKEN:", data.refresh_token)
+
+    res.send("Twitch account succesfully connected ! You can now close this page.")
+  } catch (error) {
+    res.status(500).json({ error: "OAuth callback failed" })
+  }
+})
+
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`Backend server running on port ${PORT}`)
 })
