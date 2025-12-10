@@ -1,51 +1,90 @@
 # Streamer Frontpage (Peaxy)
 
-This repository contains the source code for a custom streamer frontpage application. It provides an interactive hub for viewers to watch the live stream, view available emotes, and check the marble race leaderboard. I tried to keep it as reusable as possible for personal purposes but this project was mainly made for the twitch streamer Peaxy and both our property. You can view the production build on https://peaxy.fr
+Custom streamer frontpage application providing an interactive hub for viewers. Features live stream embedding, emotes display, marble race leaderboard, and League of Legends rank tracking. Production build available at https://peaxy.fr
 
-## Technologies Used
+## Technologies
 
-### Frontend
-- **React**: UI library for building the interface.
-- **Vite**: Fast build tool and development server.
-- **TypeScript**: Static typing for better code quality.
-- **Tailwind CSS**: Utility-first CSS framework for styling.
-
-### Backend
-- **Node.js & Express**: Simple server to handle API requests and serve data.
+- **Next.js 16** - React framework with App Router
+- **TypeScript** - Static typing
+- **Tailwind CSS v4** - Utility-first styling
+- **SWR** - Data fetching with caching and deduplication
 
 ## External APIs
-- **Twitch Embed API**: Used to embed the live Twitch player directly into the application.
-- **Google API**: Used to fetch recent youtube videos from a channel and retrieve data from an online Google Sheet.
+
+- **Twitch Embed API** - Live stream embedding
+- **Google Sheets API** - Marble race leaderboard data
+- **YouTube Data API** - Recent channel videos
+- **Riot Games API** - League of Legends account ranks and match history
+- **Wizebot API** - Viewer level data
+- **Twitch API** - Channel redemptions
+
+## API Routes
+
+| Route | Description |
+|-------|-------------|
+| `/api/lol/accounts` | Fetches LoL ranks and match history (60s cache) |
+| `/api/sheets/names` | Lists available Google Sheets (60s cache) |
+| `/api/sheets/data` | Fetches leaderboard data from sheets (60s cache) |
+| `/api/youtube/videos` | Fetches recent YouTube videos |
+| `/api/twitch/callback` | OAuth callback for Twitch authentication |
+| `/api/twitch/refresh` | Refreshes Twitch access token |
+| `/api/twitch/redemptions` | Fetches channel point redemptions |
+| `/api/wizebot/level` | Fetches viewer level from Wizebot |
+
+## Environment Variables
+
+\`\`\`env
+# Google
+GOOGLE_API_KEY=
+GOOGLE_SHEET_ID=
+
+# YouTube
+YOUTUBE_USER_ID=
+
+# Twitch
+TWITCH_BROADCASTER_ID=
+
+# Twitch Oauth Integration (should be in separate oauth/.env) Refer to oauth/README.md
+TWITCH_CLIENT_ID=
+TWITCH_CLIENT_SECRET=
+TWITCH_ACCESS_TOKEN=
+TWITCH_REFRESH_TOKEN=
+
+# Riot Games
+RIOT_API_KEY=
+RIOT_ACCOUNTS=GameName_TagLine,GameName_TagLine
+
+# Wizebot
+WIZEBOT_API_KEY=
+
+# Public
+NEXT_PUBLIC_YOUTUBE_USER=
+NEXT_PUBLIC_TWITCH_USER=
+NEXT_PUBLIC_XTWITTER_USER=
+NEXT_PUBLIC_INSTAGRAM_USER=
+NEXT_PUBLIC_TWITCH_CLIENT_ID=
+\`\`\`
 
 ## Getting Started
 
-### Prerequisites
-- Node.js (v14 or higher recommended)
-- npm or yarn
+\`\`\`bash
+# Install dependencies
+npm install
 
-### Installation
+# Run development server
+npm run dev
 
-1. Install dependencies:
-   \`\`\`bash
-   npm install
-   cd server
-   npm install
-   \`\`\`
+# Build for production
+npm run build
+\`\`\`
 
-### Running the Application
+The application will be available at `http://localhost:3000`.
 
-1. Start the development server (Frontend):
-   \`\`\`bash
-   npm run dev
-   \`\`\`
-   or to create the build folder (/dist)
-   \`\`\`bash
-   npm run build
-   \`\`\`
+## Features
 
-2. Start the backend server:
-   \`\`\`bash
-   npm run server
-   \`\`\`
-
-The application will be available at `http://localhost:5173` (default Vite port).
+- **Live Stream** - Embedded Twitch player
+- **League of Legends Ranks** - Account ranks with match history (SOLO/DUO queue)
+- **Marble Leaderboard** - Google Sheets integration with sorting
+- **Latest Content** - Recent YouTube videos
+- **Emotes** - Custom channel emotes display
+- **OAuth App** - Twitch token management at `/oauth`
