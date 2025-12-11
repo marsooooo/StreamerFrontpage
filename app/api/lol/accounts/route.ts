@@ -60,7 +60,7 @@ interface CacheEntry {
 }
 
 let cache: CacheEntry | null = null
-const CACHE_TTL = 60 * 1000 // 60 seconds
+const CACHE_TTL = 120 * 1000 // 120 seconds
 
 async function fetchMatchHistory(puuid: string, apiKey: string): Promise<MatchResult[]> {
   try {
