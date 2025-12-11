@@ -14,10 +14,9 @@ This app provides a simple UI to authenticate with Twitch and obtain access/refr
 
 ## Environment Variables
 
-| Variable | Description |
-|----------|-------------|
-| `NEXT_PUBLIC_TWITCH_CLIENT_ID` | Twitch application client ID |
-| `NEXT_PUBLIC_BACKEND_URL` | Main app URL for OAuth callback (e.g., `https://yourdomain.com`) |
+\`\`\`env
+#Check oauth/.env-dist
+\`\`\`
 
 ## Setup
 

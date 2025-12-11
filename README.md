@@ -34,35 +34,7 @@ Custom streamer frontpage application providing an interactive hub for viewers. 
 ## Environment Variables
 
 \`\`\`env
-# Google
-GOOGLE_API_KEY=
-GOOGLE_SHEET_ID=
-
-# YouTube
-YOUTUBE_USER_ID=
-
-# Twitch
-TWITCH_BROADCASTER_ID=
-
-# Twitch Oauth Integration (should be in separate oauth/.env) Refer to oauth/README.md
-TWITCH_CLIENT_ID=
-TWITCH_CLIENT_SECRET=
-TWITCH_ACCESS_TOKEN=
-TWITCH_REFRESH_TOKEN=
-
-# Riot Games
-RIOT_API_KEY=
-RIOT_ACCOUNTS=GameName_TagLine,GameName_TagLine
-
-# Wizebot
-WIZEBOT_API_KEY=
-
-# Public
-NEXT_PUBLIC_YOUTUBE_USER=
-NEXT_PUBLIC_TWITCH_USER=
-NEXT_PUBLIC_XTWITTER_USER=
-NEXT_PUBLIC_INSTAGRAM_USER=
-NEXT_PUBLIC_TWITCH_CLIENT_ID=
+#Check .env-dist and oauth/.env-dist
 \`\`\`
 
 ## Getting Started
