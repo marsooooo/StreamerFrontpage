@@ -1,7 +1,7 @@
 export default function Home() {
 
   const redirectUri = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/twitch/callback`
-  const scopes = "channel:read:redemptions channel:manage:redemptions"
+  const scopes = "channel:read:redemptions channel:manage:redemptions bits:read channel:read:subscriptions"
 
   const authUrl = `https://id.twitch.tv/oauth2/authorize?client_id=${process.env.NEXT_PUBLIC_TWITCH_CLIENT_ID}&redirect_uri=${process.env.NEXT_PUBLIC_BACKEND_URL}/api/twitch/callback&response_type=code&scope=${encodeURIComponent(scopes)}`
 
