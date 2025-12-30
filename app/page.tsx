@@ -8,10 +8,11 @@ import LatestContent from "@/components/latest-content"
 import NavTabs from "@/components/nav-tabs"
 import { AnimatedBackground } from "@/components/animated-background"
 import LoLRanks from "@/components/lol-ranks"
+import TopSection from "@/components/top-section"
 import Link from "next/link"
 
 export default function Home() {
-  const [activeTab, setActiveTab] = useState<"lol" | "leaderboard" | "emotes" | "latest">("lol")
+  const [activeTab, setActiveTab] = useState<"top" | "lol" | "leaderboard" | "emotes" | "latest">("top")
   const [playerCount, setPlayerCount] = useState(0)
 
   const [navReady, setNavReady] = useState(false)
@@ -56,6 +57,7 @@ export default function Home() {
         >
           {contentReady ? (
             <>
+              {(!showTabs || activeTab === "top") && <TopSection />}
               {(!showTabs || activeTab === "lol") && <LoLRanks />}
               {(!showTabs || activeTab === "leaderboard") && <MarbleLeaderboard onPlayerCountChange={setPlayerCount} />}
               {(!showTabs || activeTab === "emotes") && <EmotesSection />}

@@ -34,7 +34,32 @@ Custom streamer frontpage application providing an interactive hub for viewers. 
 ## Environment Variables
 
 \`\`\`env
-#Check .env-dist and oauth/.env-dist
+# Google
+GOOGLE_API_KEY=
+GOOGLE_SHEET_ID=
+
+# YouTube
+YOUTUBE_USER_ID=
+
+# Twitch
+TWITCH_CLIENT_ID=
+TWITCH_CLIENT_SECRET=
+TWITCH_ACCESS_TOKEN=
+TWITCH_BROADCASTER_ID=
+
+# Riot Games
+RIOT_API_KEY=
+RIOT_ACCOUNTS=GameName#TagLine,GameName#TagLine
+
+# Wizebot
+WIZEBOT_API_KEY=
+
+# Public
+NEXT_PUBLIC_YOUTUBE_USER=
+NEXT_PUBLIC_TWITCH_USER=
+NEXT_PUBLIC_XTWITTER_USER=
+NEXT_PUBLIC_INSTAGRAM_USER=
+NEXT_PUBLIC_TWITCH_CLIENT_ID=
 \`\`\`
 
 ## Getting Started
@@ -58,5 +83,5 @@ The application will be available at `http://localhost:3000`.
 - **League of Legends Ranks** - Account ranks with match history (SOLO/DUO queue)
 - **Marble Leaderboard** - Google Sheets integration with sorting
 - **Latest Content** - Recent YouTube videos
-- **Emotes** - Custom channel emotes display
+- **Emotes** - Channel emotes display
 - **OAuth App** - Twitch token management at `/oauth`

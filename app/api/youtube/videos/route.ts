@@ -9,7 +9,8 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Missing parameters or credentials" }, { status: 400 })
     }
 
-    const channelUrl = `https://www.googleapis.com/youtube/v3/channels?part=contentDetails&id=${youtubeChannelId}&key=${apiKey}`
+    const channelUrl =
+      "https://www.googleapis.com/youtube/v3/channels?part=contentDetails&id=" + youtubeChannelId + "&key=" + apiKey
     const channelResponse = await fetch(channelUrl)
     const channelData = await channelResponse.json()
 
@@ -18,7 +19,11 @@ export async function GET(request: NextRequest) {
     }
 
     const uploadsPlaylistId = channelData.items[0].contentDetails.relatedPlaylists.uploads
-    const videosUrl = `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId=${uploadsPlaylistId}&maxResults=3&key=${apiKey}`
+    const videosUrl =
+      "https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId=" +
+      uploadsPlaylistId +
+      "&maxResults=3&key=" +
+      apiKey
     const videosResponse = await fetch(videosUrl)
     const videosData = await videosResponse.json()
 
@@ -32,7 +37,7 @@ export async function GET(request: NextRequest) {
       thumbnail: item.snippet.thumbnails.high.url,
     }))
 
-    return NextResponse.json({ videos })
+    return NextResponse.json({ videos: videos })
   } catch (error) {
     return NextResponse.json({ error: "Failed to fetch YouTube videos" }, { status: 500 })
   }

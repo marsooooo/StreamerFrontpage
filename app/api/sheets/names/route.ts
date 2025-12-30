@@ -6,11 +6,10 @@ interface CacheEntry {
 }
 
 let cache: CacheEntry | null = null
-const CACHE_TTL = 60 * 1000 // 60 seconds
+const CACHE_TTL = 60 * 1000
 
 export async function GET() {
   try {
-    // Return cached data if valid
     if (cache && Date.now() - cache.timestamp < CACHE_TTL) {
       return NextResponse.json({ sheets: cache.data, cached: true })
     }
@@ -22,15 +21,14 @@ export async function GET() {
       return NextResponse.json({ error: "Missing API credentials" }, { status: 500 })
     }
 
-    const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}?key=${apiKey}`
+    const url = "https://sheets.googleapis.com/v4/spreadsheets/" + sheetId + "?key=" + apiKey
     const response = await fetch(url)
     const result = await response.json()
 
     if (result.sheets) {
       const sheets = result.sheets.map((sheet: any) => sheet.properties.title)
-      // Store in cache
       cache = { data: sheets, timestamp: Date.now() }
-      return NextResponse.json({ sheets })
+      return NextResponse.json({ sheets: sheets })
     } else {
       return NextResponse.json({ error: "No sheets found" }, { status: 404 })
     }

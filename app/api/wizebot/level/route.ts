@@ -12,7 +12,7 @@ export async function GET() {
     const TOP_SUB_TYPE = "month"
     const LIMIT = 5
 
-    const url = `https://wapi.wizebot.tv/api/ranking/${apiKey}/top/${TOP_TYPE}/${TOP_SUB_TYPE}/${LIMIT}`
+    const url = "https://wapi.wizebot.tv/api/ranking/" + apiKey + "/top/" + TOP_TYPE + "/" + TOP_SUB_TYPE + "/" + LIMIT
 
     const response = await fetch(url, {
       headers: { accept: "application/json" },

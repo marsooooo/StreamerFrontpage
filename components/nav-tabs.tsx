@@ -6,8 +6,8 @@ import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 
 interface NavTabsProps {
-  activeTab: "lol" | "leaderboard" | "emotes" | "latest"
-  onTabChange: (tab: "lol" | "leaderboard" | "emotes" | "latest") => void
+  activeTab: "top" | "lol" | "leaderboard" | "emotes" | "latest"
+  onTabChange: (tab: "top" | "lol" | "leaderboard" | "emotes" | "latest") => void
   showTabs: boolean
 }
 
@@ -17,6 +17,7 @@ export default function NavTabs({ activeTab, onTabChange, showTabs }: NavTabsPro
   if (!showTabs) return null
 
   const tabs = [
+    { id: "top", label: "Top" },
     { id: "lol", label: "LoL" },
     { id: "leaderboard", label: "Marble" },
     { id: "emotes", label: "Emotes" },

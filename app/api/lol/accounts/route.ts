@@ -51,7 +51,7 @@ export interface LoLAccountData {
     wins: number
     losses: number
   } | null
-  matchHistory: MatchResult[] // Added match history
+  matchHistory: MatchResult[]
 }
 
 interface CacheEntry {
@@ -60,25 +60,26 @@ interface CacheEntry {
 }
 
 let cache: CacheEntry | null = null
-const CACHE_TTL = 120 * 1000 // 120 seconds
+const CACHE_TTL = 120 * 1000
 
 async function fetchMatchHistory(puuid: string, apiKey: string): Promise<MatchResult[]> {
   try {
-    // Get last 10 ranked solo queue match IDs
-    const matchIdsRes = await fetch(
-      `https://europe.api.riotgames.com/lol/match/v5/matches/by-puuid/${puuid}/ids?queue=420&start=0&count=10&api_key=${apiKey}`,
-    )
+    const matchIdsUrl =
+      "https://europe.api.riotgames.com/lol/match/v5/matches/by-puuid/" +
+      puuid +
+      "/ids?queue=420&start=0&count=10&api_key=" +
+      apiKey
+    const matchIdsRes = await fetch(matchIdsUrl)
     if (!matchIdsRes.ok) return []
     const matchIds: string[] = await matchIdsRes.json()
 
-    // Fetch each match details
     const matchResults: MatchResult[] = []
     for (const matchId of matchIds) {
-      const matchRes = await fetch(`https://europe.api.riotgames.com/lol/match/v5/matches/${matchId}?api_key=${apiKey}`)
+      const matchUrl = "https://europe.api.riotgames.com/lol/match/v5/matches/" + matchId + "?api_key=" + apiKey
+      const matchRes = await fetch(matchUrl)
       if (!matchRes.ok) continue
       const matchData: MatchData = await matchRes.json()
 
-      // Find the player in participants
       const participant = matchData.info.participants.find((p) => p.puuid === puuid)
       if (participant) {
         matchResults.push({
@@ -96,30 +97,31 @@ async function fetchMatchHistory(puuid: string, apiKey: string): Promise<MatchRe
 
 async function fetchAccountData(gameName: string, tagLine: string, apiKey: string): Promise<LoLAccountData | null> {
   try {
-    // Step 1: Get PUUID from Riot ID
-    const accountRes = await fetch(
-      `https://europe.api.riotgames.com/riot/account/v1/accounts/by-riot-id/${encodeURIComponent(gameName)}/${encodeURIComponent(tagLine)}?api_key=${apiKey}`,
-    )
+    const accountUrl =
+      "https://europe.api.riotgames.com/riot/account/v1/accounts/by-riot-id/" +
+      encodeURIComponent(gameName) +
+      "/" +
+      encodeURIComponent(tagLine) +
+      "?api_key=" +
+      apiKey
+    const accountRes = await fetch(accountUrl)
     if (!accountRes.ok) return null
     const accountData: RiotAccount = await accountRes.json()
 
-    // Step 2: Get league entries (ranked data)
-    const leagueRes = await fetch(
-      `https://euw1.api.riotgames.com/lol/league/v4/entries/by-puuid/${accountData.puuid}?api_key=${apiKey}`,
-    )
+    const leagueUrl =
+      "https://euw1.api.riotgames.com/lol/league/v4/entries/by-puuid/" + accountData.puuid + "?api_key=" + apiKey
+    const leagueRes = await fetch(leagueUrl)
     const leagueData: LeagueEntry[] = leagueRes.ok ? await leagueRes.json() : []
 
-    // Step 3: Get summoner info (profile icon, level)
-    const summonerRes = await fetch(
-      `https://euw1.api.riotgames.com/lol/summoner/v4/summoners/by-puuid/${accountData.puuid}?api_key=${apiKey}`,
-    )
+    const summonerUrl =
+      "https://euw1.api.riotgames.com/lol/summoner/v4/summoners/by-puuid/" + accountData.puuid + "?api_key=" + apiKey
+    const summonerRes = await fetch(summonerUrl)
     const summonerData: SummonerInfo = summonerRes.ok
       ? await summonerRes.json()
       : { profileIconId: 29, summonerLevel: 0 }
 
     const matchHistory = await fetchMatchHistory(accountData.puuid, apiKey)
 
-    // Find RANKED_SOLO_5x5 entry
     const rankedSolo = leagueData.find((entry) => entry.queueType === "RANKED_SOLO_5x5")
 
     return {
@@ -136,10 +138,10 @@ async function fetchAccountData(gameName: string, tagLine: string, apiKey: strin
             losses: rankedSolo.losses,
           }
         : null,
-      matchHistory, // Include match history
+      matchHistory: matchHistory,
     }
   } catch (error) {
-    console.error(`Error fetching data for ${gameName}#${tagLine}:`, error)
+    console.error("Error fetching data for " + gameName + "#" + tagLine + ":", error)
     return null
   }
 }
@@ -160,7 +162,6 @@ export async function GET() {
     return NextResponse.json({ accounts: cache.data, cached: true })
   }
 
-  // Parse accounts from env (format: "gameName_tagLine,gameName_tagLine")
   const accountStrings = accountsEnv
     .split(",")
     .map((s) => s.trim())
@@ -168,7 +169,9 @@ export async function GET() {
   const accounts: LoLAccountData[] = []
 
   for (const accountStr of accountStrings) {
-    const [gameName, tagLine] = accountStr.split("_")
+    const parts = accountStr.split("_")
+    const gameName = parts[0]
+    const tagLine = parts[1]
     if (gameName && tagLine) {
       const data = await fetchAccountData(gameName, tagLine, apiKey)
       if (data) {
@@ -179,5 +182,5 @@ export async function GET() {
 
   cache = { data: accounts, timestamp: Date.now() }
 
-  return NextResponse.json({ accounts })
+  return NextResponse.json({ accounts: accounts })
 }

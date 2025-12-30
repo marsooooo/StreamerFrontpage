@@ -14,11 +14,11 @@ interface CacheEntry {
 }
 
 const cache: Map<string, CacheEntry> = new Map()
-const CACHE_TTL = 60 * 1000 // 60 seconds
+const CACHE_TTL = 60 * 1000
 
 export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url)
+    const searchParams = new URL(request.url).searchParams
     const sheetName = searchParams.get("sheetName")
     const apiKey = process.env.GOOGLE_API_KEY
     const sheetId = process.env.GOOGLE_SHEET_ID
@@ -27,15 +27,20 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Missing parameters or credentials" }, { status: 400 })
     }
 
-    // Check cache first
     const cacheKey = sheetName
     const cached = cache.get(cacheKey)
     if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
       return NextResponse.json({ data: cached.data, cached: true })
     }
 
-    const range = `${sheetName}!A2:Z`
-    const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${encodeURIComponent(range)}?key=${apiKey}`
+    const range = sheetName + "!A2:Z"
+    const url =
+      "https://sheets.googleapis.com/v4/spreadsheets/" +
+      sheetId +
+      "/values/" +
+      encodeURIComponent(range) +
+      "?key=" +
+      apiKey
     const response = await fetch(url)
     const result = await response.json()
 
@@ -61,7 +66,6 @@ export async function GET(request: NextRequest) {
         return true
       })
 
-    // Store in cache
     cache.set(cacheKey, { data: parsed, timestamp: Date.now() })
 
     return NextResponse.json({ data: parsed })

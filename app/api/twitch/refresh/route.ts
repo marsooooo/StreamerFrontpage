@@ -1,38 +1,17 @@
 import { NextResponse } from "next/server"
+import { refreshTwitchToken } from "@/lib/twitch"
 
 export async function POST() {
-  const clientId = process.env.TWITCH_CLIENT_ID
-  const clientSecret = process.env.TWITCH_CLIENT_SECRET
-  const refreshToken = process.env.TWITCH_REFRESH_TOKEN
+  console.log("Manual token refresh requested")
+  const newToken = await refreshTwitchToken()
 
-  if (!clientId || !clientSecret || !refreshToken) {
-    return NextResponse.json({ error: "Missing Twitch credentials" }, { status: 500 })
-  }
-
-  try {
-    const tokenRes = await fetch("https://id.twitch.tv/oauth2/token", {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: new URLSearchParams({
-        client_id: clientId,
-        client_secret: clientSecret,
-        refresh_token: refreshToken,
-        grant_type: "refresh_token",
-      }),
-    })
-
-    const tokenData = await tokenRes.json()
-
-    if (!tokenRes.ok) {
-      return NextResponse.json({ error: tokenData.message || "Failed to refresh token" }, { status: 400 })
-    }
-
+  if (newToken) {
     return NextResponse.json({
-      access_token: tokenData.access_token,
-      refresh_token: tokenData.refresh_token,
-      expires_in: tokenData.expires_in,
+      message:
+        "Token refreshed successfully and cached. Check server logs for the new token value to update your environment variables.",
+      success: true,
     })
-  } catch (err) {
-    return NextResponse.json({ error: "Failed to refresh token" }, { status: 500 })
   }
+
+  return NextResponse.json({ error: "Failed to refresh token", success: false }, { status: 400 })
 }

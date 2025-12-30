@@ -49,10 +49,16 @@ export default function LegalSection() {
         {/* Twitch */}
         <div className="space-y-3">
           <h3 className="text-lg font-semibold text-white">2. Twitch API &amp; TwitchTracker (API tierce)</h3>
-          <p className="text-sm leading-relaxed">Les données utilisées proviennent de :</p>
+          <p className="text-sm leading-relaxed">Ce site récupère des statistiques telles que :</p>
+          <ul className="text-sm list-disc list-inside ml-4 space-y-1">
+            <li>nombre de followers</li>
+            <li>viewers moyens</li>
+            <li>viewers maximum des 30 derniers jours</li>
+          </ul>
+          <p className="text-sm leading-relaxed">Ces données proviennent de :</p>
           <ul className="text-sm list-disc list-inside ml-4 space-y-1">
             <li>Twitch API (officielle)</li>
-            <li>Wizebot API (non affilié à twitch)</li>
+            <li>TwitchTracker API pour les statistiques historiques</li>
           </ul>
           <p className="text-sm">
             <strong className="text-white">Droits :</strong>
@@ -64,12 +70,13 @@ export default function LegalSection() {
 
         {/* Google */}
         <div className="space-y-3">
-          <h3 className="text-lg font-semibold text-white">3. Google APIs (YouTube / Docs)</h3>
+          <h3 className="text-lg font-semibold text-white">3. Google APIs (YouTube / OAuth / autres services)</h3>
           <p className="text-sm leading-relaxed">
             Certaines données peuvent être obtenues via les services de Google, notamment pour :
           </p>
           <ul className="text-sm list-disc list-inside ml-4 space-y-1">
-            <li>les informations de chaînes youtube publiques</li>
+            <li>les comptes YouTube</li>
+            <li>les informations de chaînes publiques</li>
             <li>d&apos;autres données accessibles via les APIs Google</li>
           </ul>
           <div className="text-sm space-y-2">
@@ -109,8 +116,8 @@ export default function LegalSection() {
           <h3 className="text-lg font-semibold text-white">5. Contact</h3>
           <p className="text-sm leading-relaxed">
             Pour toute question concernant les données externes ou les APIs utilisées, vous pouvez contacter :{" "}
-            <a href="mailto:marso.tison@gmail.com" className="text-purple-400 hover:text-purple-300 underline">
-              marso.tison@gmail.com
+            <a href="mailto:contact@peaxy.fr" className="text-purple-400 hover:text-purple-300 underline">
+              contact@peaxy.fr
             </a>
           </p>
         </div>
