@@ -67,7 +67,7 @@ export default function TwitchStream() {
       <div className="container mx-auto px-4">
         <div className="max-w-6xl mx-auto">
           <h1 className="text-4xl md:text-5xl font-bold text-white text-center mb-8 drop-shadow-lg">
-            Peaxy <span className="text-purple-400">Live</span>
+            Peaxy<span className="text-purple-400">.fr</span>
           </h1>
           <div
             className="relative w-full bg-black/40 rounded-xl overflow-hidden border border-white/10 shadow-2xl"

@@ -26,25 +26,21 @@ export default function LatestContent() {
     {
       name: "Twitch",
       url: `https://twitch.tv/${process.env.NEXT_PUBLIC_TWITCH_USER}`,
-      icon: "📺",
       color: "bg-purple-600 hover:bg-purple-700",
     },
     {
       name: "YouTube",
       url: `https://youtube.com/@${process.env.NEXT_PUBLIC_YOUTUBE_USER}`,
-      icon: "🎥",
       color: "bg-red-600 hover:bg-red-700",
     },
     {
-      name: "X",
+      name: "𝕏",
       url: `https://x.com/${process.env.NEXT_PUBLIC_XTWITTER_USER}`,
-      icon: "𝕏",
       color: "bg-black hover:bg-gray-900 border border-white",
     },
     {
       name: "Instagram",
       url: `https://instagram.com/${process.env.NEXT_PUBLIC_INSTAGRAM_USER}`,
-      icon: "📸",
       color: "bg-pink-600 hover:bg-pink-700",
     },
   ]
@@ -106,7 +102,6 @@ export default function LatestContent() {
                   rel="noopener noreferrer"
                   className={`${link.color} text-white font-semibold py-4 px-6 rounded-lg transition-all transform hover:scale-105 flex items-center justify-center gap-2 shadow-lg`}
                 >
-                  <span className="text-2xl">{link.icon}</span>
                   <span>{link.name}</span>
                 </a>
               ))}
