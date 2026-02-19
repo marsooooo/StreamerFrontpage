@@ -56,11 +56,23 @@ export interface LoLAccountData {
 
 interface CacheEntry {
   data: LoLAccountData[]
+  version: string
   timestamp: number
 }
 
 let cache: CacheEntry | null = null
 const CACHE_TTL = 120 * 1000
+
+async function fetchDDragonVersion(): Promise<string> {
+  try {
+    const res = await fetch("https://ddragon.leagueoflegends.com/api/versions.json")
+    if (!res.ok) return "15.1.1"
+    const versions: string[] = await res.json()
+    return versions[0] ?? "15.1.1"
+  } catch {
+    return "15.1.1"
+  }
+}
 
 async function fetchMatchHistory(puuid: string, apiKey: string): Promise<MatchResult[]> {
   try {
@@ -159,28 +171,30 @@ export async function GET() {
   }
 
   if (cache && Date.now() - cache.timestamp < CACHE_TTL) {
-    return NextResponse.json({ accounts: cache.data, cached: true })
+    return NextResponse.json({ accounts: cache.data, version: cache.version, cached: true })
   }
 
   const accountStrings = accountsEnv
     .split(",")
     .map((s) => s.trim())
     .filter(Boolean)
-  const accounts: LoLAccountData[] = []
 
-  for (const accountStr of accountStrings) {
-    const parts = accountStr.split("_")
-    const gameName = parts[0]
-    const tagLine = parts[1]
-    if (gameName && tagLine) {
-      const data = await fetchAccountData(gameName, tagLine, apiKey)
-      if (data) {
-        accounts.push(data)
-      }
-    }
-  }
+  const [version, ...accountResults] = await Promise.all([
+    fetchDDragonVersion(),
+    ...accountStrings.map((accountStr) => {
+      const parts = accountStr.split("_")
+      const gameName = parts[0]
+      const tagLine = parts[1]
+      if (gameName && tagLine) return fetchAccountData(gameName, tagLine, apiKey)
+      return Promise.resolve(null)
+    }),
+  ])
 
-  cache = { data: accounts, timestamp: Date.now() }
+  const accounts = (accountResults as (LoLAccountData | null)[]).filter(
+    (d): d is LoLAccountData => d !== null
+  )
 
-  return NextResponse.json({ accounts: accounts })
+  cache = { data: accounts, version: version as string, timestamp: Date.now() }
+
+  return NextResponse.json({ accounts, version })
 }

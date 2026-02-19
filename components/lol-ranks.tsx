@@ -3,6 +3,12 @@ import useSWR from "swr"
 import { fetchLoLAccounts, type LoLAccountData } from "@/lib/api-client"
 import Image from "next/image"
 
+const tiersWithoutDivision = new Set(["CHALLENGER", "GRANDMASTER", "MASTER"])
+
+function formatTierRank(tier: string, rank: string): string {
+  return tiersWithoutDivision.has(tier) ? tier : `${tier} ${rank}`
+}
+
 const tierOrder = [
   "CHALLENGER",
   "GRANDMASTER",
@@ -65,7 +71,7 @@ function sortAccounts(accounts: LoLAccountData[]): LoLAccountData[] {
   })
 }
 
-function MatchHistory({ matches }: { matches: LoLAccountData["matchHistory"] }) {
+function MatchHistory({ matches, version }: { matches: LoLAccountData["matchHistory"]; version: string }) {
   if (!matches || matches.length === 0) return null
 
   return (
@@ -78,7 +84,7 @@ function MatchHistory({ matches }: { matches: LoLAccountData["matchHistory"] }) 
           }`}
         >
           <Image
-            src={`https://ddragon.leagueoflegends.com/cdn/15.24.1/img/champion/${match.championName}.png`}
+            src={`https://ddragon.leagueoflegends.com/cdn/${version}/img/champion/${match.championName}.png`}
             alt={match.championName}
             width={28}
             height={28}
@@ -93,13 +99,13 @@ function MatchHistory({ matches }: { matches: LoLAccountData["matchHistory"] }) 
 }
 
 export default function LoLRanks() {
-  const {
-    data: rawAccounts = [],
-    isLoading: loading,
-    error,
-  } = useSWR("lol-accounts", fetchLoLAccounts, { revalidateOnFocus: false, dedupingInterval: 60000 })
+  const { data, isLoading: loading, error } = useSWR("lol-accounts", fetchLoLAccounts, {
+    revalidateOnFocus: false,
+    dedupingInterval: 60000,
+  })
 
-  const accounts = sortAccounts(rawAccounts)
+  const accounts = sortAccounts(data?.accounts ?? [])
+  const version = data?.version ?? "15.1.1"
 
   return (
     <section className="w-full py-16">
@@ -136,7 +142,7 @@ export default function LoLRanks() {
                     {/* Left: Profile icon and name */}
                     <div className="flex items-center gap-3 sm:w-[200px] shrink-0">
                       <Image
-                        src={`https://ddragon.leagueoflegends.com/cdn/15.24.1/img/profileicon/${account.profileIconId}.png`}
+                        src={`https://ddragon.leagueoflegends.com/cdn/${version}/img/profileicon/${account.profileIconId}.png`}
                         alt={`${account.gameName} profile icon`}
                         width={56}
                         height={56}
@@ -153,7 +159,7 @@ export default function LoLRanks() {
 
                     {/* Center: Match history - centered in available space */}
                     <div className="flex-1 flex justify-center order-3 sm:order-2">
-                      <MatchHistory matches={account.matchHistory} />
+                      <MatchHistory matches={account.matchHistory} version={version} />
                     </div>
 
                     {/* Right: Rank info */}
@@ -161,7 +167,7 @@ export default function LoLRanks() {
                       {account.rankedSolo ? (
                         <>
                           <div className={`font-bold text-lg ${getTierColor(account.rankedSolo.tier)}`}>
-                            {account.rankedSolo.tier} {account.rankedSolo.rank}
+                            {formatTierRank(account.rankedSolo.tier, account.rankedSolo.rank)}
                           </div>
                           <div className="text-gray-400 text-sm">{account.rankedSolo.leaguePoints} LP</div>
                           <div className="text-xs mt-1">

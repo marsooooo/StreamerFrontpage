@@ -53,11 +53,16 @@ export interface LoLAccountData {
   matchHistory: MatchResult[]
 }
 
-export async function fetchLoLAccounts(): Promise<LoLAccountData[]> {
+export interface LoLAccountsResponse {
+  accounts: LoLAccountData[]
+  version: string
+}
+
+export async function fetchLoLAccounts(): Promise<LoLAccountsResponse> {
   const response = await fetch("/api/lol/accounts")
   const result = await response.json()
   if (!response.ok) throw new Error(result.error || "Failed to fetch LoL accounts")
-  return result.accounts
+  return { accounts: result.accounts, version: result.version ?? "15.1.1" }
 }
 
 export interface TopData {
