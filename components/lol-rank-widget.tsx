@@ -48,8 +48,8 @@ function GameIcon({ match, version, animateIn }: { match: MatchResult; version: 
       <Image
         src={`https://ddragon.leagueoflegends.com/cdn/${version}/img/champion/${match.championName}.png`}
         alt={match.championName}
-        width={20}
-        height={20}
+        width={40}
+        height={40}
         className="block w-full h-auto"
       />
       <div className={`absolute inset-0 ${match.win ? "bg-green-500/30" : "bg-red-500/30"}`} />
@@ -71,14 +71,14 @@ function MatchHistory({
   if (matches.length === 0) return null
 
   return (
-    <div className="flex gap-2 relative">
+    <div className="grid grid-cols-10 gap-2 relative">
       {matches.slice(0, 10).map((match, index) => (
         <div key={index === 0 ? `new-${newGameKey}` : `slot-${index}`}>
           <GameIcon match={match} version={version} animateIn={index === 0 && newGameKey > 0} />
         </div>
       ))}
       {exitingGame && (
-        <div className="absolute top-0 right-0 lol-pop-out pointer-events-none">
+        <div className="absolute top-0 right-0 w-[10%] lol-pop-out pointer-events-none">
           <GameIcon match={exitingGame} version={version} />
         </div>
       )}
@@ -178,6 +178,8 @@ export default function LolRankWidget({ accountIndex }: { accountIndex: number }
     )
   }
 
+  const ranked = account.rankedSolo
+
   return (
     <>
       <style>{`
@@ -196,39 +198,49 @@ export default function LolRankWidget({ accountIndex }: { accountIndex: number }
 
       <div
         className={`w-full bg-gray-800/50 backdrop-blur rounded-xl border border-white/5 p-4 ${
-          account.rankedSolo ? `bg-gradient-to-r ${getTierBg(account.rankedSolo.tier)}` : ""
+          ranked ? `bg-gradient-to-r ${getTierBg(ranked.tier)}` : ""
         }`}
       >
-        {/* Top row: profile icon + name | rank */}
-        <div className="flex items-center gap-4 mb-3">
-          <Image
-            src={`https://ddragon.leagueoflegends.com/cdn/${version}/img/profileicon/${account.profileIconId}.png`}
-            alt={`${account.gameName} profile icon`}
-            width={64}
-            height={64}
-            className="rounded-full border-2 border-purple-500/50 shrink-0"
-          />
-          <span className="text-white font-bold text-2xl truncate flex-1">{account.gameName}</span>
-          <div className="text-right shrink-0">
-            {account.rankedSolo ? (
+        {/* Top row: [icon + name] — [rank + LP] — [W / L] */}
+        <div className="flex items-center justify-between mb-3 gap-4">
+
+          {/* Left: profile icon + username */}
+          <div className="flex items-center gap-3 min-w-0">
+            <Image
+              src={`https://ddragon.leagueoflegends.com/cdn/${version}/img/profileicon/${account.profileIconId}.png`}
+              alt={`${account.gameName} profile icon`}
+              width={64}
+              height={64}
+              className="rounded-full border-2 border-purple-500/50 shrink-0"
+            />
+            <span className="text-white font-bold text-2xl truncate">{account.gameName}</span>
+          </div>
+
+          {/* Center: rank + LP */}
+          <div className="flex items-baseline gap-2 shrink-0">
+            {ranked ? (
               <>
-                <div className="font-bold text-3xl text-white">
-                  {formatTierRank(account.rankedSolo.tier, account.rankedSolo.rank)}
-                </div>
-                <div className="text-gray-400 text-base">{account.rankedSolo.leaguePoints} LP</div>
-                <div className="text-sm mt-1">
-                  <span className="text-green-400">{account.rankedSolo.wins}W</span>
-                  <span className="text-gray-500 mx-1">/</span>
-                  <span className="text-red-400">{account.rankedSolo.losses}L</span>
-                </div>
+                <span className="font-bold text-2xl text-white">
+                  {formatTierRank(ranked.tier, ranked.rank)}
+                </span>
+                <span className="text-gray-400 text-base">{ranked.leaguePoints} LP</span>
               </>
             ) : (
-              <div className="text-gray-500 italic text-xl">Non classé</div>
+              <span className="text-gray-500 italic text-xl">Non classé</span>
             )}
           </div>
+
+          {/* Right: wins / losses */}
+          {ranked && (
+            <div className="flex items-center gap-1 text-lg shrink-0">
+              <span className="text-green-400 font-semibold">{ranked.wins}W</span>
+              <span className="text-gray-500 mx-0.5">/</span>
+              <span className="text-red-400 font-semibold">{ranked.losses}L</span>
+            </div>
+          )}
         </div>
 
-        {/* Match history: single row of 10 */}
+        {/* Match history: 10 icons spanning full width */}
         <MatchHistory
           matches={effectiveMatches}
           version={version}
