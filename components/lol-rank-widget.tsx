@@ -205,7 +205,7 @@ export default function LolRankWidget({ accountIndex }: { accountIndex: number }
       `}</style>
 
       <div
-        className={`w-full bg-gray-800/50 backdrop-blur rounded-xl border border-white/5 p-4 ${
+        className={`w-full bg-gray-800/80 backdrop-blur rounded-xl border border-white/5 p-4 ${
           ranked ? `bg-gradient-to-r ${getTierBg(ranked.tier)}` : ""
         }`}
       >
