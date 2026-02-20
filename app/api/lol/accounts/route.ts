@@ -54,23 +54,28 @@ export interface LoLAccountData {
   matchHistory: MatchResult[]
 }
 
-interface CacheEntry {
-  data: LoLAccountData[]
-  version: string
-  timestamp: number
-}
+// ---------------------------------------------------------------------------
+// Module-level cache — persists for the lifetime of the server process.
+// Each account is stored by its 0-based index in RIOT_ACCOUNTS.
+// ---------------------------------------------------------------------------
+const accountCache = new Map<number, LoLAccountData>()
+let ddragonVersion = "15.1.1"
+let initialized = false
 
-let cache: CacheEntry | null = null
-const CACHE_TTL = 120 * 1000
+const REFRESH_INTERVAL = 5 * 60 * 1000 // 5 minutes per account cycle
+const ACCOUNT_STAGGER  = 60 * 1000      // 1 minute between account starts
 
-async function fetchDDragonVersion(): Promise<string> {
+// ---------------------------------------------------------------------------
+// Fetch helpers
+// ---------------------------------------------------------------------------
+async function refreshDDragonVersion(): Promise<void> {
   try {
     const res = await fetch("https://ddragon.leagueoflegends.com/api/versions.json")
-    if (!res.ok) return "15.1.1"
+    if (!res.ok) return
     const versions: string[] = await res.json()
-    return versions[0] ?? "15.1.1"
+    if (versions[0]) ddragonVersion = versions[0]
   } catch {
-    return "15.1.1"
+    // keep previous value
   }
 }
 
@@ -87,17 +92,14 @@ async function fetchMatchHistory(puuid: string, apiKey: string): Promise<MatchRe
 
     const matchResults: MatchResult[] = []
     for (const matchId of matchIds) {
-      const matchUrl = "https://europe.api.riotgames.com/lol/match/v5/matches/" + matchId + "?api_key=" + apiKey
+      const matchUrl =
+        "https://europe.api.riotgames.com/lol/match/v5/matches/" + matchId + "?api_key=" + apiKey
       const matchRes = await fetch(matchUrl)
       if (!matchRes.ok) continue
       const matchData: MatchData = await matchRes.json()
-
       const participant = matchData.info.participants.find((p) => p.puuid === puuid)
       if (participant) {
-        matchResults.push({
-          championName: participant.championName,
-          win: participant.win,
-        })
+        matchResults.push({ championName: participant.championName, win: participant.win })
       }
     }
     return matchResults
@@ -107,7 +109,11 @@ async function fetchMatchHistory(puuid: string, apiKey: string): Promise<MatchRe
   }
 }
 
-async function fetchAccountData(gameName: string, tagLine: string, apiKey: string): Promise<LoLAccountData | null> {
+async function fetchAccountData(
+  gameName: string,
+  tagLine: string,
+  apiKey: string
+): Promise<LoLAccountData | null> {
   try {
     const accountUrl =
       "https://europe.api.riotgames.com/riot/account/v1/accounts/by-riot-id/" +
@@ -121,20 +127,25 @@ async function fetchAccountData(gameName: string, tagLine: string, apiKey: strin
     const accountData: RiotAccount = await accountRes.json()
 
     const leagueUrl =
-      "https://euw1.api.riotgames.com/lol/league/v4/entries/by-puuid/" + accountData.puuid + "?api_key=" + apiKey
+      "https://euw1.api.riotgames.com/lol/league/v4/entries/by-puuid/" +
+      accountData.puuid +
+      "?api_key=" +
+      apiKey
     const leagueRes = await fetch(leagueUrl)
     const leagueData: LeagueEntry[] = leagueRes.ok ? await leagueRes.json() : []
 
     const summonerUrl =
-      "https://euw1.api.riotgames.com/lol/summoner/v4/summoners/by-puuid/" + accountData.puuid + "?api_key=" + apiKey
+      "https://euw1.api.riotgames.com/lol/summoner/v4/summoners/by-puuid/" +
+      accountData.puuid +
+      "?api_key=" +
+      apiKey
     const summonerRes = await fetch(summonerUrl)
     const summonerData: SummonerInfo = summonerRes.ok
       ? await summonerRes.json()
       : { profileIconId: 29, summonerLevel: 0 }
 
     const matchHistory = await fetchMatchHistory(accountData.puuid, apiKey)
-
-    const rankedSolo = leagueData.find((entry) => entry.queueType === "RANKED_SOLO_5x5")
+    const rankedSolo = leagueData.find((e) => e.queueType === "RANKED_SOLO_5x5")
 
     return {
       gameName: accountData.gameName,
@@ -150,7 +161,7 @@ async function fetchAccountData(gameName: string, tagLine: string, apiKey: strin
             losses: rankedSolo.losses,
           }
         : null,
-      matchHistory: matchHistory,
+      matchHistory,
     }
   } catch (error) {
     console.error("Error fetching data for " + gameName + "#" + tagLine + ":", error)
@@ -158,6 +169,51 @@ async function fetchAccountData(gameName: string, tagLine: string, apiKey: strin
   }
 }
 
+// ---------------------------------------------------------------------------
+// Background scheduler — one independent loop per account, staggered by 1 min
+// ---------------------------------------------------------------------------
+function scheduleAccount(index: number, gameName: string, tagLine: string, apiKey: string): void {
+  const run = async () => {
+    console.log(`[LoL] Refreshing account ${index + 1}: ${gameName}#${tagLine}`)
+    const data = await fetchAccountData(gameName, tagLine, apiKey)
+    if (data) accountCache.set(index, data)
+    setTimeout(run, REFRESH_INTERVAL)
+  }
+
+  // Stagger: account 0 → immediate, account 1 → +1 min, account 2 → +2 min, …
+  setTimeout(run, index * ACCOUNT_STAGGER)
+}
+
+function initializeBackgroundFetches(): void {
+  if (initialized) return
+  initialized = true
+
+  const apiKey = process.env.RIOT_API_KEY
+  const accountsEnv = process.env.RIOT_ACCOUNTS
+  if (!apiKey || !accountsEnv) return
+
+  // DDragon version: fetch now, then every 5 minutes
+  const versionLoop = async () => {
+    await refreshDDragonVersion()
+    setTimeout(versionLoop, REFRESH_INTERVAL)
+  }
+  versionLoop()
+
+  // Per-account loops, staggered
+  const accountStrings = accountsEnv.split(",").map((s) => s.trim()).filter(Boolean)
+  accountStrings.forEach((accountStr, index) => {
+    const parts = accountStr.split("_")
+    const gameName = parts[0]
+    const tagLine = parts[1]
+    if (gameName && tagLine) {
+      scheduleAccount(index, gameName, tagLine, apiKey)
+    }
+  })
+}
+
+// ---------------------------------------------------------------------------
+// GET handler — just reads from cache, triggers init on first call
+// ---------------------------------------------------------------------------
 export async function GET() {
   const apiKey = process.env.RIOT_API_KEY
   const accountsEnv = process.env.RIOT_ACCOUNTS
@@ -165,36 +221,18 @@ export async function GET() {
   if (!apiKey) {
     return NextResponse.json({ error: "RIOT_API_KEY not configured" }, { status: 500 })
   }
-
   if (!accountsEnv) {
     return NextResponse.json({ error: "RIOT_ACCOUNTS not configured" }, { status: 500 })
   }
 
-  if (cache && Date.now() - cache.timestamp < CACHE_TTL) {
-    return NextResponse.json({ accounts: cache.data, version: cache.version, cached: true })
-  }
+  // Start background loops on the very first request (no-op afterwards)
+  initializeBackgroundFetches()
 
-  const accountStrings = accountsEnv
-    .split(",")
-    .map((s) => s.trim())
-    .filter(Boolean)
+  // Return accounts in their original RIOT_ACCOUNTS order
+  const accountStrings = accountsEnv.split(",").map((s) => s.trim()).filter(Boolean)
+  const accounts: LoLAccountData[] = accountStrings
+    .map((_, index) => accountCache.get(index))
+    .filter((d): d is LoLAccountData => d !== undefined)
 
-  const [version, ...accountResults] = await Promise.all([
-    fetchDDragonVersion(),
-    ...accountStrings.map((accountStr) => {
-      const parts = accountStr.split("_")
-      const gameName = parts[0]
-      const tagLine = parts[1]
-      if (gameName && tagLine) return fetchAccountData(gameName, tagLine, apiKey)
-      return Promise.resolve(null)
-    }),
-  ])
-
-  const accounts = (accountResults as (LoLAccountData | null)[]).filter(
-    (d): d is LoLAccountData => d !== null
-  )
-
-  cache = { data: accounts, version: version as string, timestamp: Date.now() }
-
-  return NextResponse.json({ accounts, version })
+  return NextResponse.json({ accounts, version: ddragonVersion })
 }
