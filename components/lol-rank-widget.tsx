@@ -72,11 +72,19 @@ function MatchHistory({
 
   return (
     <div className="grid grid-cols-10 gap-2 relative">
-      {matches.slice(0, 10).map((match, index) => (
-        <div key={index === 0 ? `new-${newGameKey}` : `slot-${index}`}>
-          <GameIcon match={match} version={version} animateIn={index === 0 && newGameKey > 0} />
-        </div>
-      ))}
+      {Array.from({ length: 10 }, (_, index) => {
+        const match = matches[index]
+        return match ? (
+          <div key={index === 0 ? `new-${newGameKey}` : `slot-${index}`}>
+            <GameIcon match={match} version={version} animateIn={index === 0 && newGameKey > 0} />
+          </div>
+        ) : (
+          <div
+            key={`empty-${index}`}
+            className="aspect-square rounded border-2 border-white/10 bg-white/5"
+          />
+        )
+      })}
       {exitingGame && (
         <div className="absolute top-0 right-0 w-[10%] lol-pop-out pointer-events-none">
           <GameIcon match={exitingGame} version={version} />
@@ -213,7 +221,7 @@ export default function LolRankWidget({ accountIndex }: { accountIndex: number }
               height={64}
               className="rounded-full border-2 border-purple-500/50 shrink-0"
             />
-            <span className="text-white font-bold text-2xl truncate">{account.gameName}</span>
+            <span className="text-white font-bold text-3xl truncate">{account.gameName}</span>
           </div>
 
           {/* Center: rank + LP */}
@@ -223,16 +231,16 @@ export default function LolRankWidget({ accountIndex }: { accountIndex: number }
                 <span className="font-bold text-2xl text-white">
                   {formatTierRank(ranked.tier, ranked.rank)}
                 </span>
-                <span className="text-gray-400 text-base">{ranked.leaguePoints} LP</span>
+                <span className="text-gray-400 text-2xl">{ranked.leaguePoints} LP</span>
               </>
             ) : (
-              <span className="text-gray-500 italic text-xl">Non classé</span>
+              <span className="text-gray-500 italic text-2xl">Non classé</span>
             )}
           </div>
 
           {/* Right: wins / losses */}
           {ranked && (
-            <div className="flex items-center gap-1 text-lg shrink-0">
+            <div className="flex items-center gap-1 text-xl shrink-0">
               <span className="text-green-400 font-semibold">{ranked.wins}W</span>
               <span className="text-gray-500 mx-0.5">/</span>
               <span className="text-red-400 font-semibold">{ranked.losses}L</span>
