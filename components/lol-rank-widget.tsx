@@ -2,8 +2,6 @@
 import { useState, useEffect, useRef } from "react"
 import useSWR from "swr"
 import { fetchLoLAccounts, type MatchResult } from "@/lib/api-client"
-
-
 import Image from "next/image"
 
 declare global {
@@ -50,8 +48,8 @@ function GameIcon({ match, version, animateIn }: { match: MatchResult; version: 
       <Image
         src={`https://ddragon.leagueoflegends.com/cdn/${version}/img/champion/${match.championName}.png`}
         alt={match.championName}
-        width={28}
-        height={28}
+        width={20}
+        height={20}
         className="block w-full h-auto"
       />
       <div className={`absolute inset-0 ${match.win ? "bg-green-500/30" : "bg-red-500/30"}`} />
@@ -73,14 +71,14 @@ function MatchHistory({
   if (matches.length === 0) return null
 
   return (
-    <div className="grid grid-cols-5 gap-1 relative">
+    <div className="flex gap-2 relative">
       {matches.slice(0, 10).map((match, index) => (
         <div key={index === 0 ? `new-${newGameKey}` : `slot-${index}`}>
           <GameIcon match={match} version={version} animateIn={index === 0 && newGameKey > 0} />
         </div>
       ))}
       {exitingGame && (
-        <div className="absolute bottom-0 right-0 lol-pop-out pointer-events-none">
+        <div className="absolute top-0 right-0 lol-pop-out pointer-events-none">
           <GameIcon match={exitingGame} version={version} />
         </div>
       )}
@@ -202,35 +200,35 @@ export default function LolRankWidget({ accountIndex }: { accountIndex: number }
         }`}
       >
         {/* Top row: profile icon + name | rank */}
-        <div className="flex items-center gap-3 mb-3">
+        <div className="flex items-center gap-4 mb-3">
           <Image
             src={`https://ddragon.leagueoflegends.com/cdn/${version}/img/profileicon/${account.profileIconId}.png`}
             alt={`${account.gameName} profile icon`}
-            width={48}
-            height={48}
+            width={64}
+            height={64}
             className="rounded-full border-2 border-purple-500/50 shrink-0"
           />
-          <span className="text-white font-bold text-lg truncate flex-1">{account.gameName}</span>
+          <span className="text-white font-bold text-2xl truncate flex-1">{account.gameName}</span>
           <div className="text-right shrink-0">
             {account.rankedSolo ? (
               <>
-                <div className="font-bold text-2xl text-white">
+                <div className="font-bold text-3xl text-white">
                   {formatTierRank(account.rankedSolo.tier, account.rankedSolo.rank)}
                 </div>
-                <div className="text-gray-400 text-sm">{account.rankedSolo.leaguePoints} LP</div>
-                <div className="text-xs mt-1">
+                <div className="text-gray-400 text-base">{account.rankedSolo.leaguePoints} LP</div>
+                <div className="text-sm mt-1">
                   <span className="text-green-400">{account.rankedSolo.wins}W</span>
                   <span className="text-gray-500 mx-1">/</span>
                   <span className="text-red-400">{account.rankedSolo.losses}L</span>
                 </div>
               </>
             ) : (
-              <div className="text-gray-500 italic">Non classé</div>
+              <div className="text-gray-500 italic text-xl">Non classé</div>
             )}
           </div>
         </div>
 
-        {/* Match history: 2×5 grid */}
+        {/* Match history: single row of 10 */}
         <MatchHistory
           matches={effectiveMatches}
           version={version}
