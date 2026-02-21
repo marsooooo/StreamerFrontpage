@@ -62,23 +62,19 @@ export default function LolRankOnlyWidget({ accountIndex }: { accountIndex: numb
 
   return (
     <div
-      className={`w-full bg-gray-800/80 backdrop-blur rounded-xl border border-white/5 px-6 py-4 flex flex-col items-center gap-1 ${
+      className={`w-full bg-gray-800/80 backdrop-blur rounded-xl border border-white/5 px-6 py-4 flex items-baseline gap-4 ${
         ranked ? `bg-gradient-to-r ${getTierBg(ranked.tier)}` : ""
       }`}
     >
       {ranked ? (
         <>
-          <div className="flex items-baseline gap-3">
-            <span className="font-bold text-3xl text-white">
-              {formatTierRank(ranked.tier, ranked.rank)}
-            </span>
-            <span className="text-gray-400 text-2xl">{ranked.leaguePoints} LP</span>
-          </div>
-          <div className="flex items-center gap-2 text-xl">
-            <span className="text-green-400 font-semibold">{ranked.wins}W</span>
-            <span className="text-gray-500">/</span>
-            <span className="text-red-400 font-semibold">{ranked.losses}L</span>
-          </div>
+          <span className="font-bold text-3xl text-white">
+            {formatTierRank(ranked.tier, ranked.rank)}
+          </span>
+          <span className="text-gray-400 text-2xl">{ranked.leaguePoints} LP</span>
+          <span className="text-green-400 font-semibold text-xl">{ranked.wins}W</span>
+          <span className="text-gray-500 text-xl">/</span>
+          <span className="text-red-400 font-semibold text-xl">{ranked.losses}L</span>
         </>
       ) : (
         <span className="text-gray-500 italic text-2xl">Non classé</span>
