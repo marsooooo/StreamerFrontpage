@@ -62,7 +62,7 @@ export default function LolRankOnlyWidget({ accountIndex }: { accountIndex: numb
 
   return (
     <div
-      className={`w-full bg-gray-800/80 backdrop-blur rounded-xl border border-white/5 px-6 py-4 flex items-baseline justify-between ${
+      className={`w-full bg-gray-800/80 backdrop-blur rounded-xl border border-white/5 px-6 py-2 flex items-baseline justify-between ${
         ranked ? `bg-gradient-to-r ${getTierBg(ranked.tier)}` : ""
       }`}
     >
