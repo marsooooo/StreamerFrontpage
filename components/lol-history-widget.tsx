@@ -16,28 +16,6 @@ const DEMO_CHAMPIONS = [
   "Ezreal", "Leona", "Syndra", "Graves", "Riven",
 ]
 
-const tiersWithoutDivision = new Set(["CHALLENGER", "GRANDMASTER", "MASTER"])
-
-function formatTierRank(tier: string, rank: string): string {
-  return tiersWithoutDivision.has(tier) ? tier : `${tier} ${rank}`
-}
-
-function getTierBg(tier: string): string {
-  const colors: Record<string, string> = {
-    CHALLENGER: "from-yellow-500/20 to-transparent",
-    GRANDMASTER: "from-red-500/20 to-transparent",
-    MASTER: "from-purple-500/20 to-transparent",
-    DIAMOND: "from-cyan-500/20 to-transparent",
-    EMERALD: "from-emerald-500/20 to-transparent",
-    PLATINUM: "from-teal-500/20 to-transparent",
-    GOLD: "from-yellow-600/20 to-transparent",
-    SILVER: "from-gray-400/20 to-transparent",
-    BRONZE: "from-orange-700/20 to-transparent",
-    IRON: "from-stone-500/20 to-transparent",
-  }
-  return colors[tier] || ""
-}
-
 function GameIcon({ match, version, animateIn }: { match: MatchResult; version: string; animateIn?: boolean }) {
   return (
     <div
@@ -57,44 +35,7 @@ function GameIcon({ match, version, animateIn }: { match: MatchResult; version: 
   )
 }
 
-function MatchHistory({
-  matches,
-  version,
-  newGameKey,
-  exitingGame,
-}: {
-  matches: MatchResult[]
-  version: string
-  newGameKey: number
-  exitingGame: MatchResult | null
-}) {
-  if (matches.length === 0) return null
-
-  return (
-    <div className="grid grid-cols-10 gap-2 relative">
-      {Array.from({ length: 10 }, (_, index) => {
-        const match = matches[index]
-        return match ? (
-          <div key={index === 0 ? `new-${newGameKey}` : `slot-${index}`}>
-            <GameIcon match={match} version={version} animateIn={index === 0 && newGameKey > 0} />
-          </div>
-        ) : (
-          <div
-            key={`empty-${index}`}
-            className="aspect-square rounded border-2 border-white/10 bg-white/5"
-          />
-        )
-      })}
-      {exitingGame && (
-        <div className="absolute top-0 right-0 w-[10%] lol-pop-out pointer-events-none">
-          <GameIcon match={exitingGame} version={version} />
-        </div>
-      )}
-    </div>
-  )
-}
-
-export default function LolRankWidget({ accountIndex }: { accountIndex: number }) {
+export default function LolHistoryWidget({ accountIndex }: { accountIndex: number }) {
   const { data, isLoading: loading, error } = useSWR("lol-accounts", fetchLoLAccounts, {
     revalidateOnFocus: false,
     dedupingInterval: 300000,
@@ -105,29 +46,22 @@ export default function LolRankWidget({ accountIndex }: { accountIndex: number }
   const version = data?.version ?? "15.1.1"
   const account = allAccounts[accountIndex - 1]
 
-  // Mock matches injected via newGame() in browser console
   const [mockMatches, setMockMatches] = useState<MatchResult[] | null>(null)
-
-  // Effective match history: mock overrides real data
   const realMatches = account?.matchHistory ?? []
   const effectiveMatches: MatchResult[] = mockMatches ?? realMatches
 
-  // Always-current ref so effects don't rely on stale closures
   const effectiveMatchesRef = useRef(effectiveMatches)
   effectiveMatchesRef.current = effectiveMatches
 
-  // Animation state
   const [newGameKey, setNewGameKey] = useState(0)
   const [exitingGame, setExitingGame] = useState<MatchResult | null>(null)
 
-  // Track previous state for diffing
   const prevRef = useRef<{ firstChamp: string | undefined; matches: MatchResult[] }>({
     firstChamp: undefined,
     matches: [],
   })
   const exitTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  // Detect new game by watching the first entry's champion
   const firstChamp = effectiveMatches[0]?.championName
 
   useEffect(() => {
@@ -146,7 +80,6 @@ export default function LolRankWidget({ accountIndex }: { accountIndex: number }
     prevRef.current = { firstChamp, matches: effectiveMatchesRef.current }
   }, [firstChamp]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Expose newGame() on window for browser console testing
   useEffect(() => {
     window.newGame = () => {
       const champ = DEMO_CHAMPIONS[Math.floor(Math.random() * DEMO_CHAMPIONS.length)]
@@ -186,7 +119,7 @@ export default function LolRankWidget({ accountIndex }: { accountIndex: number }
     )
   }
 
-  const ranked = account.rankedSolo
+  if (effectiveMatches.length === 0) return null
 
   return (
     <>
@@ -204,57 +137,27 @@ export default function LolRankWidget({ accountIndex }: { accountIndex: number }
         .lol-pop-out { animation: lolPopOut 0.5s ease-out forwards; }
       `}</style>
 
-      <div
-        className={`w-full bg-gray-800/80 backdrop-blur rounded-xl border border-white/5 p-4 ${
-          ranked ? `bg-gradient-to-r ${getTierBg(ranked.tier)}` : ""
-        }`}
-      >
-        {/* Top row: [icon + name] — [rank + LP] — [W / L] */}
-        <div className="flex items-center justify-between mb-3 gap-4">
-
-          {/* Left: profile icon + username */}
-          <div className="flex items-center gap-3 min-w-0">
-            <Image
-              src={`https://ddragon.leagueoflegends.com/cdn/${version}/img/profileicon/${account.profileIconId}.png`}
-              alt={`${account.gameName} profile icon`}
-              width={64}
-              height={64}
-              className="rounded-full border-2 border-purple-500/50 shrink-0"
-            />
-            <span className="text-white font-bold text-3xl truncate">{account.gameName}</span>
-          </div>
-
-          {/* Center: rank + LP */}
-          <div className="flex items-baseline gap-2 shrink-0">
-            {ranked ? (
-              <>
-                <span className="font-bold text-2xl text-white">
-                  {formatTierRank(ranked.tier, ranked.rank)}
-                </span>
-                <span className="text-gray-400 text-2xl">{ranked.leaguePoints} LP</span>
-              </>
+      <div className="w-full bg-gray-800/80 backdrop-blur rounded-xl border border-white/5 p-4">
+        <div className="grid grid-cols-10 gap-2 relative">
+          {Array.from({ length: 10 }, (_, index) => {
+            const match = effectiveMatches[index]
+            return match ? (
+              <div key={index === 0 ? `new-${newGameKey}` : `slot-${index}`}>
+                <GameIcon match={match} version={version} animateIn={index === 0 && newGameKey > 0} />
+              </div>
             ) : (
-              <span className="text-gray-500 italic text-2xl">Non classé</span>
-            )}
-          </div>
-
-          {/* Right: wins / losses */}
-          {ranked && (
-            <div className="flex items-center gap-1 text-xl shrink-0">
-              <span className="text-green-400 font-semibold">{ranked.wins}W</span>
-              <span className="text-gray-500 mx-0.5">/</span>
-              <span className="text-red-400 font-semibold">{ranked.losses}L</span>
+              <div
+                key={`empty-${index}`}
+                className="aspect-square rounded border-2 border-white/10 bg-white/5"
+              />
+            )
+          })}
+          {exitingGame && (
+            <div className="absolute top-0 right-0 w-[10%] lol-pop-out pointer-events-none">
+              <GameIcon match={exitingGame} version={version} />
             </div>
           )}
         </div>
-
-        {/* Match history: 10 icons spanning full width */}
-        <MatchHistory
-          matches={effectiveMatches}
-          version={version}
-          newGameKey={newGameKey}
-          exitingGame={exitingGame}
-        />
       </div>
     </>
   )
